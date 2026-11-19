@@ -5,9 +5,6 @@ eletrônica. Cada ordem liga um cliente a uma equipe e tem um checklist de
 instalação, manutenção ou consultoria. A ordem só pode ser concluída quando
 todas as suas etapas estiverem marcadas.
 
-A demonstração usa dados fictícios em memória. O menu interativo é a próxima
-etapa, no Desk App II.
-
 ## Executar
 
 Use Python 3.10 ou superior. O projeto usa apenas a biblioteca padrão.
@@ -76,10 +73,3 @@ classDiagram
 | Associação | Cada ordem referencia um cliente, uma equipe e um serviço. Esses objetos podem ser compartilhados por várias ordens. |
 | Dependência | `RelatorioServicos.resumir()` recebe ordens como argumento e usa seus status para calcular os totais. |
 
-## Roteiro do vídeo (até 3 minutos)
-
-- **0:00–1:00** — Apresente o JAM-DF e mostre as cinco relações no UML.
-- **1:00–2:15** — Rode `python demo.py`. Mostre os três checklists, a tentativa de conclusão com etapa pendente e o relatório final.
-- **2:15–3:00** — Rode `python -m unittest -v` e mostre os seis testes passando.
-
-Na entrega, inclua o link do vídeo no YouTube e o link deste repositório público.
