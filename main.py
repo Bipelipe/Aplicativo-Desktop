@@ -1,6 +1,8 @@
 """Menu de terminal do JAM-DF para o Desk App II."""
 
 from collections.abc import Container, Mapping
+from sys import stdin
+from time import sleep
 
 from modelos import (
     Cliente,
@@ -20,7 +22,7 @@ TIPOS_SERVICO = {
 }
 
 MENU = """
-JAM-DF | Desk App II
+--JAM-DF-- 
 1. Cadastrar cliente
 2. Listar clientes
 3. Cadastrar equipe
@@ -164,6 +166,9 @@ def main() -> None:
         except (EOFError, KeyboardInterrupt):
             print()
             break
+
+        if stdin.isatty():
+            sleep(1)
 
     print("JAM-DF encerrado.")
 

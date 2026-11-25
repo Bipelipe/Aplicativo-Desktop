@@ -6,7 +6,7 @@ from modelos import (
 
 
 def main() -> None:
-    cliente = Cliente("Comércio Horizonte")
+    cliente = Cliente("Padaria Scapim")
     equipe = Equipe("Equipe Técnica")
     ordens = [
         OrdemServico(1, cliente, equipe, Instalacao()),
