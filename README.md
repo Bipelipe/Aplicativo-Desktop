@@ -1,22 +1,35 @@
-# JAM-DF | Desk App I
+# JAM-DF | Desk App II
 
 Modelo em Python para acompanhar ordens de serviço de uma empresa de segurança
 eletrônica. Cada ordem liga um cliente a uma equipe e tem um checklist de
 instalação, manutenção ou consultoria. A ordem só pode ser concluída quando
 todas as suas etapas estiverem marcadas.
 
+O menu roda no terminal e os dados ficam em memória durante a sessão. Ao
+encerrar o programa, os dados da sessão são descartados.
+
 ## Executar
 
 Use Python 3.10 ou superior. O projeto usa apenas a biblioteca padrão.
 
 ```sh
-python demo.py
+python main.py
+```
+
+O menu oferece cadastro e consulta de clientes e equipes, consulta dos três
+tipos de serviço, abertura de ordens, listagem com checklists, controle de
+etapas, conclusão de ordens e relatório por status. Cadastre um cliente e uma
+equipe antes de abrir a primeira ordem. Use os números exibidos nas listas
+para selecionar os registros.
+
+Para rodar os testes da modelagem e da navegação pelo menu:
+
+```sh
 python -m unittest -v
 ```
 
-O script abre três ordens, mostra seus checklists, tenta concluir uma ordem
-com etapa pendente, finaliza essa ordem e imprime o relatório. O resultado
-esperado é **2 ordens abertas e 1 concluída**.
+O script `python demo.py` executa a demonstração automática da modelagem do
+Desk App I. Para apresentar o nível 2, use o [roteiro para duas pessoas](ROTEIRO.md).
 
 ## Diagrama de classes UML
 
