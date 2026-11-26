@@ -8,11 +8,8 @@ from pathlib import Path
 from sys import stdin
 from time import sleep
 
-from banco import BancoDados
+from banco import BANCO_PADRAO, BancoDados
 from modelos import Cliente, Equipe, OrdemServico, RelatorioServicos, TIPOS_SERVICO
-
-
-BANCO_PADRAO = Path(__file__).resolve().with_name("jam_df.sqlite3")
 
 MENU = """
 --JAM-DF--

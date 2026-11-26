@@ -1,9 +1,13 @@
 """Persistência dos clientes, equipes, ordens e checklists no SQLite."""
 
 from itertools import groupby
+from pathlib import Path
 from sqlite3 import Connection
 
 from modelos import Cliente, Equipe, ItemChecklist, OrdemServico, TIPOS_SERVICO
+
+
+BANCO_PADRAO = Path(__file__).resolve().with_name("jam_df.sqlite3")
 
 
 class BancoDados:

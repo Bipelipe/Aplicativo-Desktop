@@ -1,42 +1,45 @@
-# JAM-DF | Desk App III
+# JAM-DF | Desk App IV
 
 JAM-DF - empresa de segurança eletrônica. Cada ordem liga um cliente a uma equipe e tem um checklist de
 instalação, manutenção ou consultoria. A ordem só pode ser concluída quando
 todas as suas etapas estiverem marcadas.
 
-O menu roda no terminal. O SQLite guarda clientes, equipes, ordens de serviço
-e o progresso dos checklists entre execuções.
+A interface gráfica usa Tkinter. O SQLite guarda clientes, equipes, ordens de
+serviço e o progresso dos checklists entre execuções.
 
 ## Executar
 
-Use Python 3.10 ou superior. O projeto usa apenas a biblioteca padrão.
+Use Python 3.10 ou superior e execute o comando em um ambiente com interface
+gráfica.
 
 ```sh
-python main.py
+python interface.py
 ```
 
-O menu oferece cadastro e consulta de clientes e equipes, consulta dos três
-tipos de serviço, abertura de ordens, listagem com checklists, controle de
-etapas, conclusão de ordens e relatório por status. Cadastre um cliente e uma
-equipe antes de abrir a primeira ordem. Use os números exibidos nas listas
-para selecionar os registros.
+Para verificar se o seu Python inclui Tkinter, execute `python -m tkinter`.
+Se o módulo estiver faltando no Ubuntu ou Debian, instale o pacote
+`python3-tk` para o Python do sistema.
 
-O programa cria `jam_df.sqlite3` na pasta do projeto no primeiro uso. Para usar
-um arquivo separado, indique o caminho com `--banco`.
+Use **Clientes** e **Equipes** para cadastrar os responsáveis pela ordem.
+A área **Tipos de serviço** mostra os três checklists. Em **Ordens de serviço**,
+clique em **Nova ordem** para vincular um cliente, uma equipe e um tipo de
+serviço. Selecione a ordem e a etapa antes de clicar em **Marcar etapa**.
+Os indicadores de ordens abertas e concluídas são atualizados após as operações.
+
+## Banco de dados e testes
+
+A interface e a versão de terminal (`python main.py`) usam o mesmo arquivo
+`jam_df.sqlite3` na pasta do projeto. As duas aceitam `--banco` para indicar
+outro arquivo.
 
 ```sh
-python main.py --banco exemplo.sqlite3
-```
-
-Ao reabrir o mesmo arquivo, as listas e o relatório recuperam os dados
-salvos. Para rodar os testes da modelagem, do menu e da persistência, execute o comando abaixo.
-
-```sh
+python interface.py --banco exemplo.sqlite3
 python -m unittest -v
 ```
 
-O script `python demo.py` executa a demonstração automática da modelagem do
-Desk App I.
+Os testes cobrem a modelagem, o menu, a persistência e a interface. O teste
+gráfico requer um ambiente com Tkinter e uma tela disponível.
+O script `python demo.py` executa a demonstração da modelagem do Desk App I.
 
 ## Diagrama de classes UML
 
