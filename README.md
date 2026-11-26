@@ -1,7 +1,6 @@
 # JAM-DF | Desk App II
 
-Modelo em Python para acompanhar ordens de serviço de uma empresa de segurança
-eletrônica. Cada ordem liga um cliente a uma equipe e tem um checklist de
+JAM-DF - empresa de segurança eletrônica. Cada ordem liga um cliente a uma equipe e tem um checklist de
 instalação, manutenção ou consultoria. A ordem só pode ser concluída quando
 todas as suas etapas estiverem marcadas.
 
