@@ -35,6 +35,13 @@ class Consultoria(Servico):
         return ("Levantar necessidades", "Apresentar recomendações")
 
 
+TIPOS_SERVICO = {
+    1: ("Instalação", Instalacao),
+    2: ("Manutenção", Manutencao),
+    3: ("Consultoria", Consultoria),
+}
+
+
 @dataclass(frozen=True)
 class ItemChecklist:
     descricao: str
@@ -42,12 +49,22 @@ class ItemChecklist:
 
 
 class OrdemServico:
-    def __init__(self, numero: int, cliente: Cliente, equipe: Equipe, servico: Servico):
+    def __init__(
+        self,
+        numero: int,
+        cliente: Cliente,
+        equipe: Equipe,
+        servico: Servico,
+        *,
+        itens: Iterable[ItemChecklist] | None = None,
+    ):
         self.numero = numero
         self.cliente = cliente
         self.equipe = equipe
         self.servico = servico
-        self._itens = [ItemChecklist(etapa) for etapa in servico.gerar_checklist()]
+        if itens is None:
+            itens = (ItemChecklist(etapa) for etapa in servico.gerar_checklist())
+        self._itens = list(itens)
         self._concluida = False
 
     @property

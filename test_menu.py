@@ -2,12 +2,20 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory, mkdtemp
 
 
 class TestMenu(unittest.TestCase):
-    def executar_menu(self, *entradas: str) -> str:
+    def setUp(self):
+        pasta = TemporaryDirectory()
+        self.addCleanup(pasta.cleanup)
+        self.pasta_bancos = Path(pasta.name)
+
+    def executar_menu(self, *entradas: str, banco: Path | None = None) -> str:
+        if banco is None:
+            banco = Path(mkdtemp(dir=self.pasta_bancos)) / "jam-df.sqlite3"
         resultado = subprocess.run(
-            [sys.executable, "-X", "utf8", "main.py"],
+            [sys.executable, "-X", "utf8", "main.py", "--banco", str(banco)],
             cwd=Path(__file__).resolve().parent,
             input="\n".join((*entradas, "")),
             encoding="utf-8",
@@ -80,13 +88,61 @@ class TestMenu(unittest.TestCase):
         self.assertIn("1. [ ] Instalar equipamentos", saida)
         self.assertIn("Abertas: 1 | Concluídas: 0", saida)
 
-    def test_nova_sessao_comeca_vazia_e_encerra_no_fim_da_entrada(self):
-        self.executar_menu("1", "Mercado Horizonte", "0")
+    def test_banco_novo_comeca_vazio_e_encerra_no_fim_da_entrada(self):
         saida = self.executar_menu("2", "4", "6", "9")
         self.assertEqual(saida.count("Nenhum registro cadastrado."), 2)
         self.assertIn("Nenhuma ordem cadastrada.", saida)
         self.assertIn("Abertas: 0 | Concluídas: 0", saida)
         self.assertTrue(saida.endswith("JAM-DF encerrado.\n"))
+
+    def test_ordens_e_progresso_persistem_entre_execucoes(self):
+        banco = self.pasta_bancos / "persistencia.sqlite3"
+        self.executar_menu(
+            "1", "Mercado São José",
+            "3", "Equipe Técnica",
+            "5", "1", "1", "1",
+            "5", "1", "1", "2",
+            "5", "1", "1", "3",
+            "7", "1", "1",
+            "7", "1", "2",
+            "8", "1",
+            "7", "2", "1",
+            "0",
+            banco=banco,
+        )
+        self.assertTrue(banco.is_file())
+
+        saida = self.executar_menu(
+            "2",
+            "4",
+            "6",
+            "9",
+            "1", "Loja Central",
+            "3", "Equipe Beta",
+            "5", "2", "2", "3",
+            "8", "2",
+            "7", "2", "2",
+            "8", "2",
+            "0",
+            banco=banco,
+        )
+        self.assertIn("Clientes\n1. Mercado São José", saida)
+        self.assertIn("Equipes\n1. Equipe Técnica", saida)
+        self.assertIn("OS 1 | Instalação | Concluída", saida)
+        self.assertIn("OS 2 | Manutenção | Aberta", saida)
+        self.assertIn("1. [x] Diagnosticar falha", saida)
+        self.assertIn("2. [ ] Testar após o reparo", saida)
+        self.assertIn("OS 3 | Consultoria | Aberta", saida)
+        self.assertIn("Abertas: 2 | Concluídas: 1", saida)
+        self.assertIn("OS 4 aberta.", saida)
+        self.assertIn("Conclua todas as etapas primeiro.", saida)
+        self.assertIn("OS 2 concluída.", saida)
+
+        saida = self.executar_menu("6", "9", "0", banco=banco)
+        self.assertIn("OS 2 | Manutenção | Concluída", saida)
+        self.assertIn("OS 4 | Consultoria | Aberta", saida)
+        self.assertIn("Cliente: Loja Central | Equipe: Equipe Beta", saida)
+        self.assertIn("Abertas: 2 | Concluídas: 2", saida)
 
 
 if __name__ == "__main__":

@@ -1,28 +1,21 @@
-"""Menu de terminal do JAM-DF para o Desk App II."""
+"""Menu de terminal do JAM-DF para o Desk App III."""
 
+import sqlite3
+from argparse import ArgumentParser
 from collections.abc import Container, Mapping
+from contextlib import closing
+from pathlib import Path
 from sys import stdin
 from time import sleep
 
-from modelos import (
-    Cliente,
-    Consultoria,
-    Equipe,
-    Instalacao,
-    Manutencao,
-    OrdemServico,
-    RelatorioServicos,
-)
+from banco import BancoDados
+from modelos import Cliente, Equipe, OrdemServico, RelatorioServicos, TIPOS_SERVICO
 
 
-TIPOS_SERVICO = {
-    1: ("Instalação", Instalacao),
-    2: ("Manutenção", Manutencao),
-    3: ("Consultoria", Consultoria),
-}
+BANCO_PADRAO = Path(__file__).resolve().with_name("jam_df.sqlite3")
 
 MENU = """
---JAM-DF-- 
+--JAM-DF--
 1. Cadastrar cliente
 2. Listar clientes
 3. Cadastrar equipe
@@ -72,20 +65,19 @@ def listar_tipos(mostrar_etapas: bool = False) -> None:
                 print(f"   - {etapa}")
 
 
-def abrir_ordem(
-    numero: int, clientes: dict[int, Cliente], equipes: dict[int, Equipe]
-) -> OrdemServico:
+def abrir_ordem(banco: BancoDados) -> int:
+    clientes = banco.listar_clientes()
+    equipes = banco.listar_equipes()
     if not clientes or not equipes:
         raise ValueError("Cadastre um cliente e uma equipe antes de abrir uma ordem.")
 
     listar_cadastros(clientes, "Clientes")
-    cliente = clientes[escolher_numero("Número do cliente: ", clientes)]
+    cliente_id = escolher_numero("Número do cliente: ", clientes)
     listar_cadastros(equipes, "Equipes")
-    equipe = equipes[escolher_numero("Número da equipe: ", equipes)]
+    equipe_id = escolher_numero("Número da equipe: ", equipes)
     listar_tipos()
     tipo = escolher_numero("Tipo de serviço: ", TIPOS_SERVICO)
-    _, classe_servico = TIPOS_SERVICO[tipo]
-    return OrdemServico(numero, cliente, equipe, classe_servico())
+    return banco.abrir_ordem(cliente_id, equipe_id, tipo)
 
 
 def listar_ordens(ordens: dict[int, OrdemServico]) -> None:
@@ -111,10 +103,7 @@ def escolher_ordem(ordens: dict[int, OrdemServico]) -> OrdemServico:
     return ordens[numero]
 
 
-def main() -> None:
-    clientes: dict[int, Cliente] = {}
-    equipes: dict[int, Equipe] = {}
-    ordens: dict[int, OrdemServico] = {}
+def executar_menu(banco: BancoDados) -> None:
     relatorio = RelatorioServicos()
 
     while True:
@@ -124,36 +113,33 @@ def main() -> None:
             match opcao:
                 case "1":
                     cliente = Cliente(ler_nome("do cliente"))
-                    numero = len(clientes) + 1
-                    clientes[numero] = cliente
+                    numero = banco.cadastrar_cliente(cliente)
                     print(f"Cliente {numero} cadastrado.")
                 case "2":
-                    listar_cadastros(clientes, "Clientes")
+                    listar_cadastros(banco.listar_clientes(), "Clientes")
                 case "3":
                     equipe = Equipe(ler_nome("da equipe"))
-                    numero = len(equipes) + 1
-                    equipes[numero] = equipe
+                    numero = banco.cadastrar_equipe(equipe)
                     print(f"Equipe {numero} cadastrada.")
                 case "4":
-                    listar_cadastros(equipes, "Equipes")
+                    listar_cadastros(banco.listar_equipes(), "Equipes")
                 case "5":
-                    ordem = abrir_ordem(len(ordens) + 1, clientes, equipes)
-                    ordens[ordem.numero] = ordem
-                    print(f"OS {ordem.numero} aberta.")
+                    numero = abrir_ordem(banco)
+                    print(f"OS {numero} aberta.")
                 case "6":
-                    listar_ordens(ordens)
+                    listar_ordens(banco.listar_ordens())
                 case "7":
-                    ordem = escolher_ordem(ordens)
+                    ordem = escolher_ordem(banco.listar_ordens())
                     etapas = range(1, len(ordem.itens) + 1)
                     etapa = escolher_numero("Número da etapa: ", etapas)
-                    ordem.marcar_etapa(etapa)
+                    banco.marcar_etapa(ordem, etapa)
                     print(f"Etapa {etapa} da OS {ordem.numero} marcada.")
                 case "8":
-                    ordem = escolher_ordem(ordens)
-                    ordem.concluir()
+                    ordem = escolher_ordem(banco.listar_ordens())
+                    banco.concluir_ordem(ordem)
                     print(f"OS {ordem.numero} concluída.")
                 case "9":
-                    resumo = relatorio.resumir(ordens.values())
+                    resumo = relatorio.resumir(banco.listar_ordens().values())
                     print(f"Abertas: {resumo['abertas']} | Concluídas: {resumo['concluidas']}")
                 case "10":
                     listar_tipos(mostrar_etapas=True)
@@ -163,6 +149,8 @@ def main() -> None:
                     print("Opção inválida.")
         except ValueError as erro:
             print(erro)
+        except sqlite3.Error as erro:
+            print(f"Erro no banco de dados: {erro}")
         except (EOFError, KeyboardInterrupt):
             print()
             break
@@ -171,6 +159,21 @@ def main() -> None:
             sleep(1)
 
     print("JAM-DF encerrado.")
+
+
+def main() -> None:
+    argumentos = ArgumentParser(description="JAM-DF | Desk App III")
+    argumentos.add_argument(
+        "--banco", type=Path, default=BANCO_PADRAO,
+        help="Arquivo SQLite a usar (padrão: jam_df.sqlite3 na pasta do projeto).",
+    )
+    caminho = argumentos.parse_args().banco
+
+    try:
+        with closing(sqlite3.connect(caminho)) as conexao:
+            executar_menu(BancoDados(conexao))
+    except sqlite3.Error as erro:
+        argumentos.exit(1, f"Erro ao abrir o banco de dados: {erro}\n")
 
 
 if __name__ == "__main__":

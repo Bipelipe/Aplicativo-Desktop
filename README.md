@@ -1,11 +1,11 @@
-# JAM-DF | Desk App II
+# JAM-DF | Desk App III
 
 JAM-DF - empresa de segurança eletrônica. Cada ordem liga um cliente a uma equipe e tem um checklist de
 instalação, manutenção ou consultoria. A ordem só pode ser concluída quando
 todas as suas etapas estiverem marcadas.
 
-O menu roda no terminal e os dados ficam em memória durante a sessão. Ao
-encerrar o programa, os dados da sessão são descartados.
+O menu roda no terminal. O SQLite guarda clientes, equipes, ordens de serviço
+e o progresso dos checklists entre execuções.
 
 ## Executar
 
@@ -21,14 +21,22 @@ etapas, conclusão de ordens e relatório por status. Cadastre um cliente e uma
 equipe antes de abrir a primeira ordem. Use os números exibidos nas listas
 para selecionar os registros.
 
-Para rodar os testes da modelagem e da navegação pelo menu:
+O programa cria `jam_df.sqlite3` na pasta do projeto no primeiro uso. Para usar
+um arquivo separado, indique o caminho com `--banco`.
+
+```sh
+python main.py --banco exemplo.sqlite3
+```
+
+Ao reabrir o mesmo arquivo, as listas e o relatório recuperam os dados
+salvos. Para rodar os testes da modelagem, do menu e da persistência, execute o comando abaixo.
 
 ```sh
 python -m unittest -v
 ```
 
 O script `python demo.py` executa a demonstração automática da modelagem do
-Desk App I. Para apresentar o nível 2, use o [roteiro para duas pessoas](ROTEIRO.md).
+Desk App I.
 
 ## Diagrama de classes UML
 
